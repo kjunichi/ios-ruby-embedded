@@ -1,8 +1,14 @@
+
+
 XCODEROOT = %x[xcode-select -print-path].strip
 SIMSDKPATH = Dir["#{XCODEROOT}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk/"].sort.last
 IOSSDKPATH = Dir["#{XCODEROOT}/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk/"].sort.last
 
 task :verify_sysroot => [SIMSDKPATH, IOSSDKPATH]
+
+file "mruby" do
+  `mrb get`
+end
 
 file "ios_build_config.rb" do
 
@@ -225,6 +231,9 @@ task :mruby_headers => [:build_mruby, "MRuby.framework/Versions/1.0.0/Headers"] 
   sh "sed -i '' 's/mruby\\/irep\\.h/..\\/mruby\\/irep\\.h/g' MRuby.framework/Versions/Current/Headers/mruby/dump.h"
   sh "sed -i '' 's/mruby\\/object\\.h/..\\/mruby\\/object\\.h/g' MRuby.framework/Versions/Current/Headers/mruby/value.h"
   sh "sed -i '' 's/mruby\\/compile\\.h/..\\/mruby\\/compile\\.h/g' MRuby.framework/Versions/Current/Headers/mruby/irep.h"
+  sh "sed -i '' 's/\\<..\\/mruby\\.h\\>/\"..\\/mruby\\.h\"/g' MRuby.framework/Versions/Current/Headers/mruby/*"
+  sh "sed -i '' 's/<..\\/mruby\\/\\(.*\\)h>/\"..\\/mruby\\/\\1h\"/g' MRuby.framework/Versions/Current/Headers/mruby/*"
+  sh "sed -i '' 's/<mruby\\/\\(.*\\)h>/\"mruby\\/\\1h\"/g' MRuby.framework/Versions/Current/Headers/mruby.h"
 end
  
 task :all => [:verify_sysroot, "bin/mirb", "bin/mrbc", "bin/mruby", "MRuby.framework/Versions/Current/MRuby", :mruby_headers]
